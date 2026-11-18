@@ -1,0 +1,151 @@
+<div class="chat-wrapper">
+  <div class="chat-toolbar">
+    <div class="chat-brand"><span class="chat-brand-icon">✳</span><div><span class="eyebrow">AGROSENSE FIELD ADVISORY</span><h1>Ask your farm assistant</h1><p>Practical guidance, grounded in your farm details.</p></div></div>
+    <div class="chat-toolbar-actions">
+      <select aria-label="Recent conversations" [disabled]="isProcessing" [(ngModel)]="selectedHistoryId" [ngModelOptions]="{standalone: true}" (ngModelChange)="openConversation($event)">
+        <option value="">Recent conversations</option>
+        <option *ngFor="let conversation of conversations" [value]="conversation._id">{{ conversation.title || 'New conversation' }} · {{ conversation.updatedAt | date:'short' }}</option>
+      </select>
+      <button type="button" (click)="newChat()" [disabled]="isProcessing"><span>＋</span> New chat</button>
+    </div>
+  </div>
+  <div class="connection-note" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="chat-history" #chatContainer role="log" aria-live="polite" aria-label="Conversation messages">
+    <div class="message" *ngFor="let msg of messages" [ngClass]="msg.role">
+      
+      <!-- User Avatar / AI Avatar -->
+      <div class="avatar" *ngIf="msg.role === 'ai'">
+        <span class="icon">🌱</span>
+      </div>
+      <div class="avatar user-avatar" *ngIf="msg.role === 'user'">
+        <span class="icon">👤</span>
+      </div>
+      
+      <!-- Message Content -->
+      <div class="message-content">
+        <!-- Text Content -->
+        <div class="text-bubble" *ngIf="msg.text" [class.is-user]="msg.role === 'user'">{{ msg.text }}</div>
+        
+        <!-- Typing Indicator -->
+        <div class="typing-indicator" *ngIf="msg.isTyping">
+          <span></span><span></span><span></span>
+        </div>
+
+        <!-- Rich Cards -->
+        <ng-container *ngIf="msg.metadata">
+          
+          <!-- Crop Card -->
+          <div class="rich-card crop-card" *ngIf="msg.metadata.type === 'crop_card'">
+            <div class="card-header">
+              <h4>🌱 {{ msg.metadata.crop | uppercase }}</h4>
+            </div>
+            <div class="card-body">
+              <div class="stat-row">
+                <span class="label">Suitability</span>
+                <span class="value success-color">{{ msg.metadata.suitability }}</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Season</span>
+                <span class="value">{{ msg.metadata.season }}</span>
+              </div>
+              <div class="stat-row">
+                <span class="label">Water</span>
+                <span class="value">{{ msg.metadata.water }}</span>
+              </div>
+              <div class="reasons-section">
+                <strong>Why AgroSense recommends it</strong>
+                <ul>
+                  <li *ngFor="let reason of msg.metadata.reasons">• {{ reason }}</li>
+                </ul>
+              </div>
+              <button class="btn-secondary mt-12">View Details →</button>
+            </div>
+          </div>
+
+          <div class="rich-card crop-card" *ngIf="msg.metadata.type === 'crop_list'">
+            <div class="card-header"><h4>🌱 {{ msg.metadata.recommendationSource === 'ml_model' ? 'Experimental model ranking' : 'Crop options' }}</h4></div>
+            <div class="card-body">
+              <p *ngIf="msg.metadata.recommendationSource === 'ml_model'"><strong>Experimental only:</strong> relative model vote shares are not calibrated suitability probabilities. This model uses CTGAN-augmented data and has not been field-validated. Missing inputs are imputed from training data; previous-crop history and water requirements are not modeled.</p>
+              <div class="stat-row" *ngFor="let item of msg.metadata.recommendations">
+                <span class="label">{{ item.crop }} · {{ item.season }}</span>
+                <span class="value" *ngIf="msg.metadata.recommendationSource === 'ml_model'">Vote {{ item.score }} · {{ item.suitability }}</span>
+                <span class="value" *ngIf="msg.metadata.recommendationSource !== 'ml_model'">{{ item.suitability }} ({{ item.score }}%)</span>
+                <small>{{ item.reason }} Water: {{ item.waterRequirement }}.</small>
+              </div>
+            </div>
+          </div>
+          <div class="rich-card crop-card" *ngIf="msg.metadata.type === 'rotation_plan'">
+            <div class="card-header"><h4>🔄 Rotation plan</h4></div>
+            <div class="card-body"><div class="stat-row" *ngFor="let item of msg.metadata.plan"><span class="label">{{ item.step }}. {{ item.crop }} · {{ item.season }}</span><small>{{ item.reason }}</small></div></div>
+          </div>
+          
+          <!-- Weather Card -->
+          <div class="rich-card weather-card" *ngIf="msg.metadata.type === 'weather_card'">
+            <div class="weather-main">
+              <h2>{{ msg.metadata.temperature }}°C</h2>
+              <strong class="weather-place">📍 {{ msg.metadata.locationName || 'Farm location' }}</strong>
+              <p>{{ msg.metadata.condition }} · current weather-model conditions</p>
+              <small>{{ msg.metadata.providerTime }} {{ msg.metadata.timezone }} · Open-Meteo</small>
+            </div>
+            <div class="weather-stats">
+              <div class="stat-row">
+                <span class="label">Humidity</span>
+                <span class="value">{{ msg.metadata.humidity }}%</span>
+              </div>
+              <div class="stat-row"><span class="label">Current precipitation</span><span class="value">{{ msg.metadata.precipitation }} mm</span></div>
+              <div class="stat-row">
+                <span class="label">Wind</span>
+                <span class="value">{{ msg.metadata.wind }} km/h</span>
+              </div>
+            </div>
+            <p *ngIf="msg.metadata.stale">Provider unavailable; this is the last cached weather update.</p>
+            <small>Current conditions are model-based, not local sensor observations. Forecast values below are predictions. Place names © OpenStreetMap contributors.</small>
+            <div class="weather-forecast" *ngFor="let day of msg.metadata.forecast"><span>{{ day.date }}</span><span>{{ day.low }}° – {{ day.high }}° · {{ day.rainChance }}% rain forecast</span></div>
+          </div>
+
+          <div class="rich-card crop-card" *ngIf="msg.metadata.type === 'soil_profile' && msg.metadata.soilProfile as profile">
+            <div class="card-header"><h4>🧪 SoilGrids location estimates</h4></div>
+            <div class="card-body">
+              <p>Modeled gridded estimates · approx. {{ profile.resolutionMeters }} m · not field or laboratory measurements.</p>
+              <div class="stat-row" *ngFor="let property of profile.properties">
+                <span class="label">{{ property.label }}</span>
+                <span class="value" *ngFor="let depth of property.depths">{{ depth.depth }}: {{ depth.estimate === null ? 'No estimate' : depth.estimate + ' ' + property.unit }}<small *ngIf="depth.estimate !== null"> · {{ depth.statistic }}<ng-container *ngIf="depth.lower !== null && depth.upper !== null"> · range {{ depth.lower }}–{{ depth.upper }}</ng-container></small></span>
+              </div>
+              <small>Source: <a href="https://www.isric.org/explore/soilgrids" target="_blank" rel="noopener">ISRIC SoilGrids 2.0</a> · {{ profile.cached ? 'cached' : 'retrieved' }} {{ profile.retrievedAt | date:'medium' }}</small>
+            </div>
+          </div>
+
+        </ng-container>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input-area">
+    <div class="suggested-prompts" *ngIf="messages.length < 3 && !isProcessing">
+      <button type="button" class="prompt-chip" *ngFor="let prompt of suggestedPrompts" (click)="usePrompt(prompt)" [disabled]="isProcessing">
+        {{ prompt }}
+      </button>
+    </div>
+    
+    <div class="quick-actions">
+      <button type="button" (click)="usePrompt('Recommend a crop')" [disabled]="isProcessing">🌱 Recommend crop</button>
+      <button type="button" (click)="usePrompt('Plan crop rotation')" [disabled]="isProcessing">↻ Plan rotation</button>
+      <button type="button" (click)="usePrompt('Check weather')" [disabled]="isProcessing">☼ Check weather</button>
+      <button type="button" (click)="usePrompt('Analyze my soil')" [disabled]="isProcessing">⌁ Soil advice</button>
+    </div>
+
+    <div class="input-box">
+      <textarea 
+        placeholder="Ask AgroSense..." 
+        aria-label="Ask your farm assistant"
+        [(ngModel)]="userInput" 
+        (keydown.enter)="$event.preventDefault(); sendMessage()"
+        rows="1">
+      </textarea>
+      <button class="send-btn" (click)="sendMessage()" [disabled]="!userInput.trim() || isProcessing">
+        ➤
+      </button>
+    </div>
+  </div>
+</div>

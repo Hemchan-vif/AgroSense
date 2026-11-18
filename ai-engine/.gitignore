@@ -1,0 +1,8 @@
+# Local dataset download and generated training artifacts
+/data/Crop recommendation dataset.csv
+/artifacts/
+/.venv/
+/.tmp/
+/pip-cache/
+__pycache__/
+*.py[cod]

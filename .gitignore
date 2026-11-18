@@ -1,0 +1,60 @@
+# Environment files & Secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+pip-cache/
+*/pip-cache/
+*/.tmp/
+.tmp/
+
+# Build and distribution outputs
+dist/
+build/
+out/
+*.egg-info/
+.eggs/
+
+# AI model artifacts / large binaries / local training data
+ai-engine/artifacts/
+ai-engine/data/
+ai-engine/.venv/
+ai-engine/.tmp/
+ai-engine/pip-cache/
+
+# Cloudflare tunnel / local temporary binaries
+cloudflared.exe
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.sublime-workspace
+*.swp
+*.swo
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+desktop.ini
+

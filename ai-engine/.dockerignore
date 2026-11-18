@@ -1,0 +1,6 @@
+.venv/
+.tmp/
+pip-cache/
+data/Crop recommendation dataset.csv
+__pycache__/
+*.py[cod]

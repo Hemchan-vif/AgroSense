@@ -1,0 +1,71 @@
+<div class="mobile-page">
+  <div class="page-header">
+    <h2>👤 Farmer Profile</h2>
+    <span class="tg-badge">Telegram Linked</span>
+  </div>
+  <p *ngIf="error">{{ error }}</p>
+  <div class="section-title">🚜 Saved farm</div>
+  <div class="settings-list" *ngIf="farm">
+    <div class="setting-item"><span>Location</span><span>{{ farm.locationText || (farm.location ? 'Coordinates saved' : 'Not set') }}</span></div>
+    <div class="setting-item"><span>Soil</span><span>{{ farm.soilType || 'Not set' }}</span></div>
+    <div class="setting-item"><span>Previous crop</span><span>{{ farm.previousCrop || 'Not set' }}</span></div>
+  </div>
+  <a routerLink="/farm">Edit farm profile →</a>
+
+  <!-- User Card -->
+  <div class="profile-card">
+    <div class="profile-avatar">🌱</div>
+    <div class="profile-details">
+      <div class="profile-name">{{ userName }}</div>
+      <div class="profile-handle">{{ userHandle }} • {{ userId }}</div>
+    </div>
+  </div>
+
+  <!-- Language Switcher -->
+  <div class="section-title">🌐 Preferred Language</div>
+  <div class="lang-selector">
+    <button class="lang-btn" [class.active]="language.includes('English')" (click)="toggleLanguage('English')">
+      🇬🇧 English
+    </button>
+    <button class="lang-btn" [class.active]="language.includes('Tamil')" (click)="toggleLanguage('தமிழ் (Tamil)')">
+      🇮🇳 தமிழ் (Tamil)
+    </button>
+  </div>
+
+  <!-- Settings list -->
+  <div class="section-title">⚙ App Preferences</div>
+  <div class="settings-list">
+    <div class="setting-item">
+      <div class="setting-meta">
+        <span class="s-icon">🔔</span>
+        <div>
+          <div class="s-name">Daily Farming Advisories</div>
+          <div class="s-desc">Sent via Telegram bot every morning</div>
+        </div>
+      </div>
+      <span class="toggle-on">ON</span>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-meta">
+        <span class="s-icon">🌦</span>
+        <div>
+          <div class="s-name">Severe Weather Warnings</div>
+          <div class="s-desc">Instant alerts for rainfall & cyclones</div>
+        </div>
+      </div>
+      <span class="toggle-on">ON</span>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-meta">
+        <span class="s-icon">📱</span>
+        <div>
+          <div class="s-name">Telegram WebApp Version</div>
+          <div class="s-desc">Running inside Telegram SDK v{{ tgVersion }}</div>
+        </div>
+      </div>
+      <span class="badge-ver">v{{ tgVersion }}</span>
+    </div>
+  </div>
+</div>

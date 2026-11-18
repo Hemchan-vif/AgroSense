@@ -1,0 +1,5 @@
+# Match the model-serving environment so the joblib artifact loads consistently.
+numpy==2.5.4
+pandas==3.1.0
+scikit-learn==1.9.1
+joblib==1.6.0

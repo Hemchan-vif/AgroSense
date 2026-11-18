@@ -1,0 +1,50 @@
+<div class="mobile-container">
+  <!-- Mobile Top Navigation Header -->
+  <header class="mobile-app-header">
+    <div class="brand-section">
+      <div class="brand-icon">🌱</div>
+      <div class="brand-info">
+        <div class="brand-title">AgroSense</div>
+        <div class="brand-subtitle">
+          <span class="live-dot"></span>
+          <span>Online • AI Assistant</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <a class="location-chip" routerLink="/farm">
+        <span class="loc-icon">📍</span>
+        <span class="loc-text">{{ locationLabel }}</span>
+      </a>
+      <a class="user-avatar" routerLink="/profile">
+        <span>{{ userInitial }}</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main View Content Area -->
+  <main class="mobile-content-area">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Mobile Bottom Tab Navigation -->
+  <nav class="mobile-bottom-nav">
+    <a routerLink="/chat" routerLinkActive="active" (click)="onTabClick()" class="nav-tab">
+      <div class="tab-icon">💬</div>
+      <span class="tab-label">Chat</span>
+    </a>
+    <a routerLink="/farm" routerLinkActive="active" (click)="onTabClick()" class="nav-tab">
+      <div class="tab-icon">🚜</div>
+      <span class="tab-label">Farm</span>
+    </a>
+    <a routerLink="/insights" routerLinkActive="active" (click)="onTabClick()" class="nav-tab">
+      <div class="tab-icon">🌱</div>
+      <span class="tab-label">Crops</span>
+    </a>
+    <a routerLink="/profile" routerLinkActive="active" (click)="onTabClick()" class="nav-tab">
+      <div class="tab-icon">👤</div>
+      <span class="tab-label">Profile</span>
+    </a>
+  </nav>
+</div>

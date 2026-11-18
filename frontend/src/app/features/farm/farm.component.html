@@ -1,0 +1,81 @@
+<div class="mobile-page farm-page">
+  <header class="page-header farm-page-header">
+    <div><span class="eyebrow">FARM WORKSPACE</span><h2>Farm profile</h2><p>Keep your field details in one place for more useful guidance.</p></div>
+    <span class="status-badge">{{ busy ? 'Saving…' : farm._id ? 'Saved profile' : 'New profile' }}</span>
+  </header>
+
+  <form class="farm-form" (ngSubmit)="save()">
+    <section class="form-section location-section">
+      <div class="section-heading"><span class="section-icon">⌖</span><div><h3>Farm location</h3><p>Weather and soil estimates use these coordinates.</p></div></div>
+      <div class="location-result" *ngIf="locationStatus"><span class="location-dot" [class.pending]="placeBusy || locationBusy"></span><div><strong>{{ farm.locationText || (hasCoordinates ? 'Coordinates selected' : 'Location not set') }}</strong><small>{{ locationBusy ? 'Waiting for device GPS…' : placeBusy ? 'Finding the nearest mapped area…' : locationStatus }}</small></div></div>
+      <div class="location-actions">
+        <button class="action-button primary-action" type="button" (click)="getLocation()" [disabled]="locationBusy || busy">
+          <span>{{ locationBusy ? '◌' : '⌖' }}</span>{{ locationBusy ? 'Getting precise location…' : 'Use device location' }}
+        </button>
+        <button class="action-button secondary-action" type="button" (click)="openManualMap()" [disabled]="busy">＋ Manual location · map pin</button>
+      </div>
+      <label class="field-label">Place or area name <span>Optional</span><input name="locationText" [(ngModel)]="farm.locationText" placeholder="Village, town, district"></label>
+      <small class="section-description">Place labels from OpenStreetMap · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a>.</small>
+      <div class="location-coords" *ngIf="hasCoordinates"><span>PIN COORDINATES</span><strong>{{ coordinateLabel }}</strong><small *ngIf="accuracyMeters !== null">Device GPS accuracy about ±{{ accuracyMeters }} m. Map grids and reverse-geocoded addresses are approximate.</small></div>
+      <p class="inline-success" *ngIf="saved">Profile saved. Soil estimates are unchanged.</p>
+    </section>
+
+    <section class="map-picker" *ngIf="manualMapOpen" aria-label="Choose farm location on map">
+      <div class="map-panel-header"><div><span class="eyebrow">MANUAL LOCATION</span><h3>Place the farm pin</h3><p>Tap the map to move the pin. Zoom out to select another area.</p></div><button type="button" class="close-map" (click)="closeManualMap()" aria-label="Close map">×</button></div>
+      <div class="map-stage">
+        <div #mapHost class="map-canvas" role="application" aria-label="Interactive OpenStreetMap farm location picker"></div>
+        <div class="map-tile-status" *ngIf="mapTilesLoading || mapTileError" [class.tile-error]="mapTileError" (click)="$event.stopPropagation()">
+          <span>{{ mapTileError ? mapErrorMessage : 'Loading map…' }}</span>
+          <button *ngIf="mapTileError" type="button" (click)="retryMapTiles($event)">Retry</button>
+        </div>
+      </div>
+      <div class="coordinate-entry">
+        <label class="field-label">Latitude<input type="number" name="manualLatitude" [(ngModel)]="manualLatitude" min="-90" max="90" step="any" placeholder="e.g. 11.0168" (ngModelChange)="updateManualCoordinates()"></label>
+        <label class="field-label">Longitude<input type="number" name="manualLongitude" [(ngModel)]="manualLongitude" min="-180" max="180" step="any" placeholder="e.g. 76.9558" (ngModelChange)="updateManualCoordinates()"></label>
+      </div>
+      <p class="coordinate-help">Tap or drag the map pin to fill these fields, or enter coordinates directly. AgroSense previews the nearest mapped place for a valid coordinate pair.</p>
+      <div class="place-preview" *ngIf="placePreviewBusy || placePreview"><span class="preview-dot" [class.pending]="placePreviewBusy"></span><span><strong>{{ placePreviewBusy ? 'Finding nearest mapped place…' : placePreview }}</strong><small>Place preview from the entered coordinates</small></span></div>
+      <div class="map-selection"><span>{{ mapPinPlaced ? 'Pin point selected' : 'Tap the map to place a pin' }}</span><strong>{{ mapCenter.latitude | number:'1.5-5' }}, {{ mapCenter.longitude | number:'1.5-5' }}</strong></div>
+      <button type="button" class="save-button" [disabled]="placeBusy" (click)="useMapPin()">{{ placeBusy ? 'Finding place…' : 'Use coordinates and find place' }} <span>→</span></button>
+    </section>
+
+    <section class="form-section">
+      <div class="section-heading"><span class="section-icon">▦</span><div><h3>Farm details</h3><p>Information that helps tailor recommendations.</p></div></div>
+      <label class="field-label">Farm name<input name="name" [(ngModel)]="farm.name" placeholder="My Farm"></label>
+      <div class="form-row"><label class="field-label">Farm size<input type="number" min="0" step="0.01" name="size" [(ngModel)]="farm.farmSize!.value" placeholder="e.g. 2"></label><label class="field-label">Unit<select name="unit" [(ngModel)]="farm.farmSize!.unit"><option value="acres">Acres</option><option value="hectares">Hectares</option></select></label></div>
+      <div class="form-row"><label class="field-label">Soil type<select name="soil" [(ngModel)]="farm.soilType"><option [ngValue]="undefined">Select soil type</option><option *ngFor="let soil of soils" [value]="soil">{{ soil }}</option></select></label><label class="field-label">Season<select name="season" [(ngModel)]="farm.season"><option *ngFor="let season of seasons" [value]="season">{{ season }}</option></select></label></div>
+      <label class="field-label">Irrigation method<select name="irrigation" [(ngModel)]="farm.irrigation"><option [ngValue]="undefined">Not specified</option><option>Rainfed</option><option>Drip</option><option>Sprinkler</option><option>Canal</option><option>Tube Well</option><option>Other</option></select></label>
+      <div class="form-row"><label class="field-label">Previous crop<input name="previous" [(ngModel)]="farm.previousCrop" placeholder="Optional"></label><label class="field-label">Current crop<input name="current" [(ngModel)]="farm.currentCrop" placeholder="Optional"></label></div>
+    </section>
+
+    <section class="form-section measured-section">
+      <div class="section-heading"><span class="section-icon">⌁</span><div><h3>Measured soil results</h3><p>Optional · enter values from a lab test only.</p></div></div>
+      <label class="field-label">pH<input type="number" min="0" max="14" step="0.1" name="ph" [(ngModel)]="farm.soilParameters!.ph" placeholder="Lab result"></label>
+      <div class="form-row"><label class="field-label">Nitrogen<input type="number" min="0" name="n" [(ngModel)]="farm.soilParameters!.nitrogen" placeholder="kg/ha"></label><label class="field-label">Phosphorus<input type="number" min="0" name="p" [(ngModel)]="farm.soilParameters!.phosphorus" placeholder="kg/ha"></label></div>
+      <label class="field-label">Potassium<input type="number" min="0" name="k" [(ngModel)]="farm.soilParameters!.potassium" placeholder="kg/ha"></label>
+    </section>
+
+    <section class="soilgrids-card">
+      <div class="section-heading"><span class="section-icon soil-icon">✳</span><div><h3>Mapped soil profile</h3><p>ISRIC SoilGrids · modeled estimates · approx. 250 m grid</p></div></div>
+      <p class="section-description">Separate from your farm inputs. Request this only when you need it; saving your profile never starts a soil lookup.</p>
+      <button class="action-button secondary-action soil-request" type="button" (click)="loadSoilProfile()" [disabled]="soilBusy || !hasSavedCoordinates">
+        <span *ngIf="soilBusy" class="button-spinner"></span><span *ngIf="!soilBusy">⌕</span>{{ soilBusy ? 'Requesting soil estimates…' : soilProfile ? 'Refresh mapped estimate' : hasSavedCoordinates ? 'Get soil estimate' : 'Save farm location first' }}
+      </button>
+      <p class="form-error" *ngIf="soilError">{{ soilError }}</p>
+      <p class="section-description" *ngIf="soilBusy">The provider can take a little while to respond. You can continue editing the rest of your profile.</p>
+      <ng-container *ngIf="soilProfile && !soilProfile.unavailable">
+        <p class="cache-line">{{ soilProfile.stale ? 'Previously cached estimate' : soilProfile.cached ? 'Cached estimate' : 'Retrieved' }} · {{ soilProfile.retrievedAt | date:'medium' }}</p>
+        <small class="section-description">{{ soilProfile.textureDescription }}</small>
+        <div class="soil-property" *ngFor="let property of soilProfile.properties">
+          <div class="property-title"><strong>{{ property.label }}</strong><span>{{ property.unit }}</span></div>
+          <div class="soil-depth" *ngFor="let depth of property.depths"><span>{{ depth.depth }}</span><strong *ngIf="depth.estimate !== null">{{ depth.estimate }} <small>{{ depth.statistic }}</small></strong><span *ngIf="depth.estimate === null">No estimate</span><small *ngIf="depth.lower !== null && depth.upper !== null">Range {{ depth.lower }}–{{ depth.upper }}</small></div>
+        </div>
+        <small class="source-note">Mapped estimates are not field or laboratory measurements. Use soil testing for field decisions. <a href="https://www.isric.org/explore/soilgrids" target="_blank" rel="noopener">About SoilGrids</a>.</small>
+      </ng-container>
+    </section>
+
+    <p class="form-error" *ngIf="error">{{ error }}</p>
+    <button class="save-button" type="submit" [disabled]="busy"><span>{{ busy ? 'Saving profile…' : 'Save farm profile' }}</span><span *ngIf="busy" class="button-spinner"></span><span *ngIf="!busy">→</span></button>
+  </form>
+
+</div>

@@ -1,0 +1,15 @@
+<div class="mobile-page">
+  <div class="page-header"><div><span class="eyebrow">LOCAL CONDITIONS</span><h2>Farm weather</h2></div><button type="button" class="weather-refresh" (click)="refresh()" [disabled]="weatherBusy">{{ weatherBusy ? 'Updating…' : '↻ Refresh' }}</button></div>
+  <button class="mobile-action-btn" type="button" (click)="useCurrentLocation()" [disabled]="locationBusy || weatherBusy">{{ locationBusy ? 'Getting precise location…' : '⌖ Use my current location' }}</button>
+  <button *ngIf="usingCurrentLocation" class="weather-refresh" type="button" (click)="useFarmLocation()" [disabled]="weatherBusy">Use saved farm location</button>
+  <div class="weather-card" *ngIf="weather && !weather.unavailable">
+    <div class="weather-main"><span class="weather-place">📍 {{ weather.locationName || 'Selected farm area' }}</span><h2>{{ weather.temperature }}°C</h2><p>{{ weather.condition }} · current model conditions</p><small>Provider time: {{ weather.providerTime }} {{ weather.timezone }} · {{ weather.locationSource === 'device' ? 'device location' : 'saved farm location' }}</small></div>
+    <div class="weather-stats"><div class="stat-row"><span class="label">Feels like</span><span class="value">{{ weather.feelsLike }}°C</span></div><div class="stat-row"><span class="label">Humidity</span><span class="value">{{ weather.humidity }}%</span></div><div class="stat-row"><span class="label">Current precipitation</span><span class="value">{{ weather.precipitation }} mm</span></div><div class="stat-row"><span class="label">Wind</span><span class="value">{{ weather.wind }} km/h · gusts {{ weather.windGusts }} km/h</span></div><div class="stat-row"><span class="label">Cloud cover</span><span class="value">{{ weather.cloudCover }}%</span></div></div>
+    <p *ngIf="weather.stale">Weather provider is unavailable; showing the last cached update from {{ weather.fetchedAt | date:'medium' }}.</p>
+    <small *ngIf="!weather.stale">Fetched {{ weather.fetchedAt | date:'medium' }}{{ weather.cached ? ' · cached' : '' }}. Current conditions are weather-model data, not a local sensor observation.</small>
+  </div>
+  <p *ngIf="error">{{ error }}</p>
+  <section class="rotation-card" *ngIf="weather?.forecast?.length"><div class="card-title">Short-term forecast</div><div class="weather-forecast" *ngFor="let day of weather.forecast"><span>{{ day.date | date:'EEE, d MMM' }}</span><span>{{ day.low }}° – {{ day.high }}° · {{ day.rainChance }}% rain probability</span></div><p>Forecast values are predictions. Current conditions are weather-model data.</p></section>
+  <small class="weather-attribution">Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> · CC BY 4.0 · Place names © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a></small>
+  <a class="mobile-action-btn" routerLink="/farm">Set farm location →</a>
+</div>

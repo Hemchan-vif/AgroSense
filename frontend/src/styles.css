@@ -1,0 +1,133 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Manrope:wght@400;600;700;800&display=swap');
+
+:root {
+  /* Core Colors */
+  --color-primary: #191975;
+  --color-primary-light: #E9EAF5;
+  --color-deep-navy: #191975;
+  --color-dark-navy: #10104A;
+  --color-soft-navy: #1E293B;
+  
+  /* Telegram Adaptive Colors */
+  --tg-bg: var(--tg-theme-bg-color, #F4F6F9);
+  --tg-text: var(--tg-theme-text-color, #1A202C);
+  --tg-hint: var(--tg-theme-hint-color, #718096);
+  --tg-btn: var(--tg-theme-button-color, #191975);
+  --tg-btn-text: var(--tg-theme-button-text-color, #FFFFFF);
+  --tg-sec-bg: var(--tg-theme-secondary-bg-color, #FFFFFF);
+
+  /* Neutral Colors */
+  --color-white: #FFFFFF;
+  --color-off-white: #F4F6F9;
+  --color-light-gray: #E2E8F0;
+  
+  /* Text Colors */
+  --color-text-dark: #1A202C;
+  --color-text-muted: #718096;
+  
+  /* Status Colors */
+  --color-success: #198754;
+  --color-warning: #D97706;
+  --color-error: #DC2626;
+
+  /* Typography */
+  --font-heading: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Layout Variables */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.12);
+  --glass-bg: rgba(255, 255, 255, 0.88);
+  --glass-border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+/* Telegram Dark Mode */
+[data-theme="dark"], body.dark-mode {
+  --color-white: #1E293B;
+  --color-off-white: #0F172A;
+  --color-light-gray: #334155;
+  --color-text-dark: #F8FAFC;
+  --color-text-muted: #94A3B8;
+  --tg-bg: var(--tg-theme-bg-color, #0F172A);
+  --tg-text: var(--tg-theme-text-color, #F8FAFC);
+  --tg-sec-bg: var(--tg-theme-secondary-bg-color, #1E293B);
+  --glass-bg: rgba(30, 41, 59, 0.88);
+  --glass-border: 1px solid rgba(51, 65, 85, 0.8);
+}
+
+/* Base Reset & Typography */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--tg-bg);
+  color: var(--tg-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--color-text-dark);
+}
+
+h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; }
+h2 { font-size: clamp(24px, 4vw, 36px); }
+h3 { font-size: 24px; }
+
+a {
+  text-decoration: none;
+  color: var(--color-primary);
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+/* Scrollbar styling for a premium feel */
+.agrosense-map-icon { background: transparent; border: 0; }
+.agrosense-map-icon > span { position: absolute; top: 3px; left: 3px; display: block; width: 24px; height: 24px; border: 3px solid #fff; border-radius: 50% 50% 50% 4px; background: #d83d43; box-shadow: 0 3px 8px rgba(0,0,0,.3); transform: rotate(-45deg); }
+.agrosense-map-icon > span::after { content: ''; position: absolute; top: 6px; left: 6px; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-light-gray);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - agrosense-mongo:/data/db
+  backend:
+    build: 
+      context: ./backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - mongodb
+      - ai-engine
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/agrosense
+      AI_SERVICE_URL: http://ai-engine:8000
+
+  ai-engine:
+    build:
+      context: ./ai-engine
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+volumes:
+  agrosense-mongo:

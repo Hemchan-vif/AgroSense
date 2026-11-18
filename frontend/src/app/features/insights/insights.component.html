@@ -1,0 +1,15 @@
+<div class="mobile-page">
+  <div class="page-header"><h2>🌱 Crop insights</h2><span class="plan-badge">Saved advice</span></div>
+  <p *ngIf="error">{{ error }}</p>
+  <section class="rotation-card" *ngFor="let item of recommendations">
+    <div class="card-title">Crop recommendations · {{ item.createdAt | date:'mediumDate' }}</div>
+    <p *ngIf="item.source === 'ml_model'"><strong>Experimental model ranking:</strong> votes are not calibrated suitability probabilities. The Mendeley data was CTGAN-augmented and this model has not been field-validated. Missing inputs were filled with training-data medians/modes. Previous-crop effects, crop water need, and crop-specific calendar are not modeled.</p>
+    <p *ngIf="item.source !== 'ml_model'">Rule-based suitability guidance from the farm details recorded at the time. Scores are not yield predictions.</p>
+    <div class="timeline-step" *ngFor="let crop of item.recommendations"><div class="step-marker">{{ item.source === 'ml_model' ? ('#' + crop.suitability.replace('Model rank ', '')) : (crop.score + '%') }}</div><div class="step-info"><div class="step-crop">{{ crop.crop }} <span class="tag current">{{ crop.suitability }}</span></div><div class="step-desc">{{ crop.reason }} · {{ crop.season }} · {{ crop.waterRequirement }} water</div></div></div>
+  </section>
+  <section class="rotation-card" *ngFor="let item of plans">
+    <div class="card-title">🔄 Rotation plan · {{ item.createdAt | date:'mediumDate' }}</div>
+    <div class="timeline"><div class="timeline-step" *ngFor="let step of item.plan"><div class="step-marker">{{ step.step }}</div><div class="step-info"><div class="step-crop">{{ step.crop }}</div><div class="step-desc">{{ step.season }} · {{ step.reason }}</div></div></div></div>
+  </section>
+  <div class="rotation-card" *ngIf="!error && !recommendations.length && !plans.length"><div class="card-title">No saved advice yet</div><p>Ask AgroSense to recommend a crop or plan a rotation. Your advice will appear here.</p><a routerLink="/chat">Open chat →</a></div>
+</div>
